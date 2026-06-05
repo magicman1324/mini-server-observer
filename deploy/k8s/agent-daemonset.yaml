@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent
+  namespace: hydra
+spec:
+  clusterIP: None
+  selector:
+    app: hydra-agent
+  ports:
+    - port: 9100
+      targetPort: 9100
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: hydra-agent
+  namespace: hydra
+spec:
+  selector:
+    matchLabels:
+      app: hydra-agent
+  template:
+    metadata:
+      labels:
+        app: hydra-agent
+    spec:
+      hostPID: true
+      hostNetwork: true
+      containers:
+        - name: agent
+          image: hydra-agent:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9100
+          env:
+            - name: HYDRA_LISTEN_ADDR
+              value: ":9100"
+            - name: HYDRA_REGION
+              value: "default"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 64Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9100
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9100
+            initialDelaySeconds: 15
+            periodSeconds: 20

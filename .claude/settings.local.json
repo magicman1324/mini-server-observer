@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pdftotext *)",
+      "Bash(git *)",
+      "Bash(go mod *)",
+      "Bash(go build *)",
+      "Bash(GOPROXY=https://proxy.golang.org,direct go mod tidy)",
+      "Bash(GOPROXY=direct go mod tidy)",
+      "Bash(go test *)"
+    ]
+  }
+}

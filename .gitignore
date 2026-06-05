@@ -1,0 +1,45 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+
+# Test binary
+*.test
+*.out
+
+# Go
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+*.env
+
+# Node
+node_modules/
+dist/
+.cache/
+
+# Docker
+*.log
+
+# Temp
+tmp/
+temp/
+
+# Generated protobuf
+*.pb.go
+*_grpc.pb.go

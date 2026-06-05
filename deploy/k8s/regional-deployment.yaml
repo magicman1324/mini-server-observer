@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hydra-regional
+  namespace: hydra
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hydra-regional
+  template:
+    metadata:
+      labels:
+        app: hydra-regional
+    spec:
+      containers:
+        - name: regional
+          image: hydra-regional:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: HYDRA_CENTRAL_ADDR
+              value: "central.hydra.svc.cluster.local:50051"
+            - name: HYDRA_REGION
+              value: "default"
+            - name: HYDRA_SCRAPE_INTERVAL
+              value: "15s"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

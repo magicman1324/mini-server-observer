@@ -1,0 +1,169 @@
+syntax = "proto3";
+
+package hydra;
+
+option go_package = "github.com/pingan/hydra/internal/proto";
+
+// ============================================================
+// Metric Ingestion (Regional Collector -> Central)
+// ============================================================
+service MetricIngestion {
+  rpc StreamMetrics(stream MetricBatch) returns (stream IngestAck);
+  rpc SendBatch(MetricBatch) returns (IngestAck);
+}
+
+message MetricSample {
+  int64  timestamp_ms = 1;
+  string name         = 2;
+  double value        = 3;
+  string host         = 4;
+  string region       = 5;
+  map<string, string> labels = 6;
+}
+
+message MetricBatch {
+  string region              = 1;
+  string collector_id        = 2;
+  repeated MetricSample samples = 3;
+  int64  batch_seq           = 4;
+}
+
+message IngestAck {
+  bool   success   = 1;
+  string message   = 2;
+  int32  accepted  = 3;
+  int32  rejected  = 4;
+}
+
+// ============================================================
+// Management API (Central -> Frontend / CLI)
+// ============================================================
+service ManagementAPI {
+  rpc CreateRule(CreateRuleReq) returns (RuleResp);
+  rpc UpdateRule(UpdateRuleReq) returns (RuleResp);
+  rpc DeleteRule(DeleteRuleReq) returns (Empty);
+  rpc GetRule(GetRuleReq) returns (RuleResp);
+  rpc ListRules(ListRulesReq) returns (ListRulesResp);
+  rpc ListAlerts(ListAlertsReq) returns (ListAlertsResp);
+  rpc GetAlert(GetAlertReq) returns (AlertResp);
+  rpc CreateSilence(CreateSilenceReq) returns (SilenceResp);
+  rpc DeleteSilence(DeleteSilenceReq) returns (Empty);
+  rpc ListSilences(ListSilencesReq) returns (ListSilencesResp);
+  rpc QueryMetrics(MetricsQuery) returns (MetricsQueryResp);
+  rpc ListHosts(ListHostsReq) returns (ListHostsResp);
+}
+
+message CreateRuleReq {
+  string name         = 1;
+  string description  = 2;
+  string metric       = 3;
+  string operator     = 4;
+  double threshold    = 5;
+  uint32 duration_sec = 6;
+  string severity     = 7;
+  string expression   = 8;
+  map<string, string> labels      = 9;
+  map<string, string> annotations = 10;
+}
+
+message UpdateRuleReq { string id = 1; CreateRuleReq fields = 2; }
+message DeleteRuleReq { string id = 1; }
+message GetRuleReq    { string id = 1; }
+message ListRulesReq  { int32 page = 1; int32 page_size = 2; string severity = 3; }
+
+message RuleResp {
+  string id           = 1;
+  string name         = 2;
+  string description  = 3;
+  string metric       = 4;
+  string operator     = 5;
+  double threshold    = 6;
+  uint32 duration_sec = 7;
+  string severity     = 8;
+  string expression   = 9;
+  bool   enabled      = 10;
+  map<string, string> labels      = 11;
+  map<string, string> annotations = 12;
+  string created_at   = 13;
+  string updated_at   = 14;
+}
+
+message ListRulesResp { repeated RuleResp rules = 1; int32 total = 2; int32 page = 3; int32 page_size = 4; }
+
+message AlertResp {
+  string id          = 1;
+  string rule_id     = 2;
+  string rule_name   = 3;
+  string host        = 4;
+  string region      = 5;
+  string severity    = 6;
+  string metric      = 7;
+  double value       = 8;
+  double threshold   = 9;
+  string message     = 10;
+  string status      = 11;
+  string fired_at    = 12;
+  string resolved_at = 13;
+  map<string, string> labels = 14;
+}
+
+message ListAlertsReq {
+  int32  page       = 1;
+  int32  page_size  = 2;
+  string status     = 3;
+  string severity   = 4;
+  string host       = 5;
+  string rule_id    = 6;
+  string start_time = 7;
+  string end_time   = 8;
+}
+
+message ListAlertsResp { repeated AlertResp alerts = 1; int32 total = 2; }
+message GetAlertReq { string id = 1; }
+
+message CreateSilenceReq {
+  string matchers   = 1;
+  string starts_at  = 2;
+  string ends_at    = 3;
+  string comment    = 4;
+}
+
+message DeleteSilenceReq  { string id = 1; }
+message ListSilencesReq   {}
+
+message SilenceResp {
+  string id         = 1;
+  string matchers   = 2;
+  string starts_at  = 3;
+  string ends_at    = 4;
+  string comment    = 5;
+  string created_by = 6;
+  string created_at = 7;
+}
+
+message ListSilencesResp { repeated SilenceResp silences = 1; }
+
+message MetricsQuery {
+  string name       = 1;
+  string host       = 2;
+  string region     = 3;
+  string start_time = 4;
+  string end_time   = 5;
+  int32  limit      = 6;
+}
+
+message MetricsQueryResp { repeated MetricSample samples = 1; }
+
+message ListHostsReq {}
+
+message HostInfo {
+  string host       = 1;
+  string region     = 2;
+  string first_seen = 3;
+  string last_seen  = 4;
+  map<string, string> labels = 5;
+}
+
+message ListHostsResp { repeated HostInfo hosts = 1; }
+
+message Empty {}

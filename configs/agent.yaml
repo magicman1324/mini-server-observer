@@ -1,0 +1,3 @@
+# Hydra Agent Configuration
+listen_addr: ":9100"
+region: "default"

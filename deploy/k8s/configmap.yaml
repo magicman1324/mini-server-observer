@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hydra-config
+  namespace: hydra
+data:
+  central.yaml: |
+    listen_addr: ":8080"
+  regional.yaml: |
+    scrape_interval: 15s
+    grpc_port: 50051
+    central_addr: "central.hydra.svc.cluster.local:50051"
+    buffer_size: 4096
+    targets:
+      - host: "agent-0.agent.hydra.svc.cluster.local"
+        port: 9100
+      - host: "agent-1.agent.hydra.svc.cluster.local"
+        port: 9100
+  agent.yaml: |
+    listen_addr: ":9100"
+    region: "default"
