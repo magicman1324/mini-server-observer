@@ -10,7 +10,7 @@ Agent (:9100 /metrics) ←──HTTP scrape──→ Regional Collector ──gR
                                                                      ┌────────────┼────────────┐
                                                                      ▼            ▼            ▼
                                                                  ClickHouse   Alert Engine  REST API (:8080)
-                                                                 (metrics,     (state        (Gin, JWT)
+                                                                 (metrics,     (state        (net/http, JWT)
                                                                   rules,...)   machine)          │
                                                                                      ┌─────────▼─────────┐
                                                                                      │  Dashboard (React) │
@@ -36,7 +36,7 @@ Agent (:9100 /metrics) ←──HTTP scrape──→ Regional Collector ──gR
 |------|------|
 | Agent | Go 1.25，纯 procfs/cgroup，<5MB 二进制 |
 | Regional Collector | Go 1.25 + gRPC stream client |
-| Central Aggregator | Go 1.25 + Gin (REST) + gRPC server |
+| Central Aggregator | Go 1.25 + net/http (REST) + gRPC server |
 | Alert Engine | Go state machine + channel pipeline |
 | 存储 | ClickHouse MergeTree (列式，分区 + TTL) |
 | 前端 | React 19 + TypeScript + Vite 6 + Recharts + Tailwind CSS 3.4 |
@@ -54,7 +54,7 @@ Agent (:9100 /metrics) ←──HTTP scrape──→ Regional Collector ──gR
 │       ├── scraper/       # HTTP 指标抓取器
 │       ├── ingest/        # gRPC 流摄取
 │       ├── alert/         # 自研告警引擎
-│       ├── repository/    # ClickHouse 数据访问
+│       ├── repository/    # 数据访问层 (in-memory / ClickHouse)
 │       └── api/rest/      # REST API
 ├── frontend/              # React Dashboard
 ├── schema/                # ClickHouse DDL
